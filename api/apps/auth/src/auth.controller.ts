@@ -1,6 +1,14 @@
-import { Controller } from '@nestjs/common';
-import { Ctx, MessagePattern, RmqContext } from '@nestjs/microservices';
+import { Controller, Request, UseGuards } from '@nestjs/common';
+import {
+  Ctx,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from '@nestjs/microservices';
+import { LoginDTO } from 'apps/api/dto';
 import { AuthService } from './auth.service';
+import { UserDTO } from './dto';
+import { JwtGuard } from './jwt.guard';
 
 @Controller()
 export class AuthController {
@@ -20,5 +28,33 @@ export class AuthController {
     const message = context.getMessage();
     channel.ack(message);
     return this.authService.getUsers();
+  }
+
+  @MessagePattern('register')
+  async register(@Ctx() context: RmqContext, @Payload() newUser: UserDTO) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    channel.ack(message);
+    return this.authService.registerUser(newUser);
+  }
+
+  @MessagePattern('login')
+  async login(@Ctx() context: RmqContext, @Payload() loginDetails: LoginDTO) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    channel.ack(message);
+    return this.authService.login(loginDetails);
+  }
+
+  @MessagePattern({ cmd: 'verify-jwt' })
+  @UseGuards(JwtGuard)
+  async verifyJwt(
+    @Ctx() context: RmqContext,
+    @Payload() payload: { jwt: string },
+  ) {
+    const channel = context.getChannelRef();
+    const message = context.getMessage();
+    channel.ack(message);
+    return await this.authService.verifyJwt(payload.jwt);
   }
 }

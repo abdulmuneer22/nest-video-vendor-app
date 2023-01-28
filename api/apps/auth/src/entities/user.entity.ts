@@ -38,18 +38,9 @@ export class User extends BaseEntity {
   })
   status: AccountStatusEnum;
 
-  @Column({ nullable: true })
-  accessToken: string;
-
-  @Column({ nullable: true })
-  firebaseUserId: string;
-
-  @Column({ nullable: true })
-  profileImageUrl: string;
-
-  @Column({ nullable: true })
-  signInProvider: string;
-
   @Column({ default: false })
   emailVerified: boolean;
+
+  @Column({ nullable: true, select: false })
+  password: string;
 }
