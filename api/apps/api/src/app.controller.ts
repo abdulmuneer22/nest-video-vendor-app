@@ -13,4 +13,9 @@ export class AppController {
   getHello() {
     return this.authService.send('say-hello', {});
   }
+
+  @Get('/users')
+  getUsers() {
+    return this.authService.send('get-users', {});
+  }
 }
